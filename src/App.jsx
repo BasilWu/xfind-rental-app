@@ -1,4 +1,5 @@
 // src/App.jsx
+import MyProfile from "./pages/MyProfile";
 import React, { useState } from 'react';
 import Header from './components/Header';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -34,6 +35,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MyProfile />
+          </ProtectedRoute>
+        }
+      />
       </Routes>
     </BrowserRouter>
   );

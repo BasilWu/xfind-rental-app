@@ -1,4 +1,5 @@
 // src/components/Header.jsx
+import { Link } from "react-router-dom";
 import React, { useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -51,18 +52,10 @@ export default function Header({ onPlaceSelect }) {
         )}
       </div>
 
-      <div className="flex items-center space-x-4">
-        <span className="font-semibold">Hello,</span>
-        <span className="font-bold">{user.email}</span>
-        <span className="ml-2 text-sm text-gray-600">
-          ({profile?.role ?? 'tenant'})
-        </span>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-        >
-          登出
-        </button>
+      <div>
+        <span>Hello, {user?.email}</span>
+        <Link to="/profile" className="ml-4 hover:underline">會員中心</Link>
+        <button onClick={logout} className="ml-4 text-red-500">登出</button>
       </div>
     </header>
   );
