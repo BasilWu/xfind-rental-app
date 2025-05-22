@@ -1,5 +1,6 @@
 // src/App.jsx
 import MyProfile from "./pages/MyProfile";
+import RentalDetail from './pages/RentalDetail';
 import React, { useState } from 'react';
 import Header from './components/Header';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -40,6 +41,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MyProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/detail/:id"
+          element={
+            <ProtectedRoute>
+              <RentalDetail />
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,7 @@
 // src/pages/TenantHome.jsx
 import listings from '../data/listings';
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -9,6 +11,7 @@ import Select from 'react-select';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 
 export default function TenantHome({ searchCenter }) {
+  const navigate = useNavigate();
   // Google Map loader
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -147,22 +150,23 @@ export default function TenantHome({ searchCenter }) {
         <h2 className="text-xl font-semibold">房源列表</h2>
         <div className="grid grid-cols-1 gap-4 mt-6">
           {filteredListings.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow p-4">
-              <img
-                src={item.image || item.imageUrl}
-                alt={item.title}
-                className="w-full h-48 object-cover rounded"
-              />
+            <Link
+              key={item.id}
+              to={`/detail/${item.id}`}
+              className="bg-white rounded-lg shadow p-4 block hover:shadow-lg transition"
+            >
+              <img src={item.image} alt={item.title} className="w-full h-48 object-cover rounded" />
               <div className="mt-2 font-bold text-lg">{item.title}</div>
               <div className="text-sm text-gray-600">{item.address}</div>
               <div className="text-blue-600 font-semibold mt-2">{item.price} 元／月</div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
 
       {/* 地圖 */}
       <div className="flex-1 relative">
+        
         <GoogleMap
           mapContainerStyle={{ width: '100%', height: '100%' }}
           center={
@@ -178,7 +182,7 @@ export default function TenantHome({ searchCenter }) {
             <Marker
               key={item.id}
               position={{ lat: item.lat, lng: item.lng }}
-              onClick={() => setSelectedId(item.id)}
+              onClick={() => navigate(`/detail/${item.id}`)}
             />
           ))}
 
