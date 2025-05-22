@@ -1,88 +1,120 @@
 // src/pages/MyProfile.jsx
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { getAuth, updateProfile } from "firebase/auth";
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function MyProfile() {
   const { user } = useAuth();
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-  const [editing, setEditing] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setDisplayName(user.displayName || '');
-      setEmail(user.email || '');
-    }
-  }, [user]);
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // 儲存個人資料
-  const handleSave = async (e) => {
-    e.preventDefault();
-    if (!displayName) return toast.error('請輸入暱稱');
-    try {
-      await updateProfile(getAuth().currentUser, { displayName });
-      toast.success('更新成功！');
-      setEditing(false);
-    } catch (err) {
-      toast.error('更新失敗：' + err.message);
+  const handleSave = async () => {
+    if (!displayName) {
+      toast.error("姓名不能為空！");
+      return;
     }
+    setSaving(true);
+    try {
+      await updateProfile(getAuth().currentUser, {
+        displayName,
+        photoURL,
+      });
+      toast.success("資料已更新！");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("更新失敗：" + error.message);
+    }
+    setSaving(false);
   };
 
-  if (!user) return <div>請先登入</div>;
-
   return (
-    <div className="max-w-lg mx-auto mt-12 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-6">會員中心</h2>
-      <form onSubmit={handleSave} className="space-y-4">
+    <div className="max-w-xl mx-auto mt-12 bg-white p-8 rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-4">會員中心</h2>
+      <div className="flex items-center mb-6">
+        <img
+          src={photoURL || "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName)}
+          alt="頭貼"
+          className="w-20 h-20 rounded-full object-cover border mr-6"
+        />
         <div>
-          <label className="block mb-2 text-gray-700">Email</label>
+          <div className="text-lg font-semibold">{displayName}</div>
+          <div className="text-sm text-gray-500">{user?.email}</div>
+          <span className="inline-block mt-2 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded">
+            {user?.role === "landlord" ? "房東" : "租客"}
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block mb-1 text-gray-600">姓名</label>
           <input
-            type="email"
-            value={email}
-            className="w-full p-2 border rounded bg-gray-100"
+            className="border rounded px-3 py-2 w-full"
+            value={displayName}
+            disabled={!isEditing}
+            onChange={e => setDisplayName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-gray-600">頭貼圖片 URL</label>
+          <input
+            className="border rounded px-3 py-2 w-full"
+            value={photoURL}
+            disabled={!isEditing}
+            onChange={e => setPhotoURL(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block mb-1 text-gray-600">信箱</label>
+          <input
+            className="border rounded px-3 py-2 w-full bg-gray-100"
+            value={user?.email}
             disabled
           />
         </div>
         <div>
-          <label className="block mb-2 text-gray-700">暱稱</label>
+          <label className="block mb-1 text-gray-600">角色</label>
           <input
-            type="text"
-            value={displayName}
-            disabled={!editing}
-            onChange={e => setDisplayName(e.target.value)}
-            className={`w-full p-2 border rounded ${editing ? '' : 'bg-gray-100'}`}
+            className="border rounded px-3 py-2 w-full bg-gray-100"
+            value={user?.role === "landlord" ? "房東" : "租客"}
+            disabled
           />
         </div>
-        <div className="flex gap-3 mt-4">
-          {!editing ? (
+      </div>
+
+      <div className="mt-8 flex gap-4">
+        {!isEditing ? (
+          <button
+            className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => setIsEditing(true)}
+          >
+            編輯
+          </button>
+        ) : (
+          <>
             <button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="bg-blue-600 text-white py-2 px-4 rounded"
+              className="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              onClick={handleSave}
+              disabled={saving}
             >
-              編輯
+              儲存
             </button>
-          ) : (
-            <>
-              <button
-                type="submit"
-                className="bg-green-600 text-white py-2 px-4 rounded"
-              >
-                儲存
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className="bg-gray-400 text-white py-2 px-4 rounded"
-              >
-                取消
-              </button>
-            </>
-          )}
-        </div>
-      </form>
+            <button
+              className="px-5 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+              onClick={() => setIsEditing(false)}
+              disabled={saving}
+            >
+              取消
+            </button>
+          </>
+        )}
+      </div>
+      <ToastContainer />
     </div>
   );
 }

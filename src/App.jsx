@@ -36,13 +36,13 @@ export default function App() {
           }
         />
         <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <MyProfile />
-          </ProtectedRoute>
-        }
-      />
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <MyProfile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
