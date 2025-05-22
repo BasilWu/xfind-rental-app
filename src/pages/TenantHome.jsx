@@ -1,4 +1,5 @@
 // src/pages/TenantHome.jsx
+import listings from '../data/listings';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -7,8 +8,7 @@ const LIBRARIES = ['places'];
 import Select from 'react-select';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 
-
-export default function TenantHome({ listings, searchCenter }) {
+export default function TenantHome({ searchCenter }) {
   // Google Map loader
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -36,14 +36,13 @@ export default function TenantHome({ listings, searchCenter }) {
   // 當 listings 改變，先設定篩後資料跟價格滑桿範圍
   useEffect(() => {
     if (listings.length) {
-      // 計算資料中最低／最高價
       const prices = listings.map(l => l.price);
       const minP = Math.min(...prices);
       const maxP = Math.max(...prices);
       setFilters(f => ({ ...f, priceRange: [minP, maxP] }));
       setFilteredListings(listings);
     }
-  }, [listings]);
+  }, []);
 
   // 當 searchCenter 改變，先套用地理篩選
   useEffect(() => {
@@ -60,7 +59,7 @@ export default function TenantHome({ listings, searchCenter }) {
         setFilteredListings(geoFiltered);
       }
     }
-  }, [searchCenter, listings]);
+  }, [searchCenter]);
 
   // 當 filters 或 listings 變動，套用所有篩選條件
   useEffect(() => {
@@ -71,16 +70,17 @@ export default function TenantHome({ listings, searchCenter }) {
     result = result.filter(l => l.price >= minPrice && l.price <= maxPrice);
 
     // 臥室數
-    if (filters.bedrooms.length) {
+    // （如果你資料有要補上 bedrooms 屬性才會作用，否則不會過濾）
+    if (filters.bedrooms.length && result[0]?.bedrooms !== undefined) {
       result = result.filter(l => filters.bedrooms.includes(l.bedrooms));
     }
     // 衛浴數
-    if (filters.bathrooms.length) {
+    if (filters.bathrooms.length && result[0]?.bathrooms !== undefined) {
       result = result.filter(l => filters.bathrooms.includes(l.bathrooms));
     }
 
     setFilteredListings(result);
-  }, [filters, listings]);
+  }, [filters]);
 
   if (!isLoaded) return <div>Loading map…</div>;
 
@@ -143,22 +143,22 @@ export default function TenantHome({ listings, searchCenter }) {
             }
           />
         </div>
-
         {/* 列表區 */}
         <h2 className="text-xl font-semibold">房源列表</h2>
-        {filteredListings.map(item => (
-          <div
-            key={item.id}
-            onClick={() => {
-              mapRef.current.panTo({ lat: item.lat, lng: item.lng });
-              setSelectedId(item.id);
-            }}
-            className="mb-4 p-4 bg-white border rounded hover:shadow cursor-pointer"
-          >
-            <h3 className="font-bold">{item.title}</h3>
-            <p className="text-gray-600">NT${item.price}/mo • {item.bedrooms}房 {item.bathrooms}衛</p>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 gap-4 mt-6">
+          {filteredListings.map((item) => (
+            <div key={item.id} className="bg-white rounded-lg shadow p-4">
+              <img
+                src={item.image || item.imageUrl}
+                alt={item.title}
+                className="w-full h-48 object-cover rounded"
+              />
+              <div className="mt-2 font-bold text-lg">{item.title}</div>
+              <div className="text-sm text-gray-600">{item.address}</div>
+              <div className="text-blue-600 font-semibold mt-2">{item.price} 元／月</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 地圖 */}
