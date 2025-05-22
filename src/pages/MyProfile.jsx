@@ -1,29 +1,47 @@
-// src/pages/MyProfile.jsx
-import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function MyProfile() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [saving, setSaving] = useState(false);
 
-  if (!user) return <div>載入中…</div>;
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await updateProfile({ displayName });
+      alert("儲存成功！");
+    } catch (err) {
+      alert("更新失敗：" + err.message);
+    }
+    setSaving(false);
+  };
 
   return (
-    <div className="max-w-lg mx-auto p-6 mt-8 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">會員中心</h2>
-      <div className="space-y-4">
+    <div className="max-w-lg mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-6">會員中心</h2>
+      <form onSubmit={handleSave} className="space-y-4">
         <div>
-          <span className="font-semibold">信箱：</span>
-          <span>{user.email}</span>
+          <label className="block mb-1">信箱</label>
+          <input className="w-full border p-2" value={user?.email || ""} disabled />
         </div>
         <div>
-          <span className="font-semibold">角色：</span>
-          <span>{user.role || '租客／房東'}</span>
+          <label className="block mb-1">顯示名稱</label>
+          <input
+            className="w-full border p-2"
+            value={displayName}
+            onChange={e => setDisplayName(e.target.value)}
+          />
         </div>
-        {/* 這裡可以放頭像、姓名等 */}
-      </div>
-      <button className="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-        編輯
-      </button>
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-6 py-2 rounded"
+          disabled={saving}
+        >
+          {saving ? "儲存中..." : "儲存"}
+        </button>
+      </form>
     </div>
   );
 }
