@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './components/Header';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth }   from './contexts/AuthContext';
@@ -14,21 +14,23 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  // 搜尋後的地點中心
+  const [searchCenter, setSearchCenter] = useState(null);
+
+  const handlePlaceSelect = center => {
+    setSearchCenter(center);
+  };
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* 公開的登入／註冊頁 */}
         <Route path="/login" element={<Login />} />
-
-        {/* 受保護的所有路由 */}
         <Route
           path="/*"
           element={
             <ProtectedRoute>
-              {/* 全域 Header */}
-              <Header />
-              {/* 根據角色自動切換的主頁 */}
-              <Home />
+              <Header onPlaceSelect={handlePlaceSelect} />
+              <Home searchCenter={searchCenter} />
             </ProtectedRoute>
           }
         />
