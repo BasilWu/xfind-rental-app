@@ -1,41 +1,43 @@
+// src/pages/Login.jsx
 import React, { useState } from 'react';
 import { useAuth }         from '../contexts/AuthContext';
 import { useNavigate }     from 'react-router-dom';
+import { firestore }       from '../firebase';
+import { doc, setDoc }     from 'firebase/firestore';
 
 export default function Login() {
   const { user, login, signup } = useAuth();
   const navigate = useNavigate();
 
-  // local state
   const [isSignup, setIsSignup] = useState(false);
+  const [role, setRole]         = useState('tenant');   // 新增：預設租客
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
 
-  // 切換登入/註冊
   const toggleMode = () => {
     setError('');
     setIsSignup(prev => !prev);
   };
 
-  // 處理表單提交
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     try {
       if (isSignup) {
-        await signup(email, password);
+        // 1) 建帳號
+        const cred = await signup(email, password);
+        // 2) 寫入 users collection：role 欄位
+        await setDoc(doc(firestore, 'users', cred.user.uid), { role });
       } else {
         await login(email, password);
       }
-      // 成功後導回首頁
       navigate('/');
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // 如果已經登入，就直接導回首頁
   if (user) {
     navigate('/');
     return null;
@@ -43,16 +45,26 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm"
-      >
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isSignup ? '註冊帳號' : '登入'}
         </h2>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-4">{error}</p>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        {/* 新增：角色選擇 */}
+        {isSignup && (
+          <label className="block mb-4">
+            <span className="text-gray-700">身份</span>
+            <select
+              value={role}
+              onChange={e => setRole(e.target.value)}
+              className="mt-1 block w-full border rounded px-3 py-2 focus:outline-none"
+            >
+              <option value="tenant">租客</option>
+              <option value="landlord">房東</option>
+            </select>
+          </label>
         )}
 
         <label className="block mb-2">
