@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import { Link } from "react-router-dom";
 import React, { useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,7 +8,6 @@ export default function Header({ onPlaceSelect }) {
   const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
 
-  // 載入 Google Places Library
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries: ['places']
@@ -55,7 +53,13 @@ export default function Header({ onPlaceSelect }) {
       <div>
         <span>Hello, {user?.email}</span>
         <Link to="/profile" className="ml-4 hover:underline">會員中心</Link>
-        <button onClick={logout} className="ml-4 text-red-500">登出</button>
+        {/* 只有房東看到 */}
+        {profile?.role === "landlord" && (
+          <Link to="/landlord" className="ml-4 hover:underline">
+            房東後台
+          </Link>
+        )}
+        <button onClick={handleLogout} className="ml-4 text-red-500">登出</button>
       </div>
     </header>
   );

@@ -1,4 +1,3 @@
-// src/pages/MyProfile.jsx
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { getAuth, updateProfile } from "firebase/auth";
@@ -6,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function MyProfile() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -45,7 +44,7 @@ export default function MyProfile() {
           <div className="text-lg font-semibold">{displayName}</div>
           <div className="text-sm text-gray-500">{user?.email}</div>
           <span className="inline-block mt-2 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded">
-            {user?.role === "landlord" ? "房東" : "租客"}
+            {profile?.role === "landlord" ? "房東" : "租客"}
           </span>
         </div>
       </div>
@@ -81,7 +80,7 @@ export default function MyProfile() {
           <label className="block mb-1 text-gray-600">角色</label>
           <input
             className="border rounded px-3 py-2 w-full bg-gray-100"
-            value={user?.role === "landlord" ? "房東" : "租客"}
+            value={profile?.role === "landlord" ? "房東" : "租客"}
             disabled
           />
         </div>
