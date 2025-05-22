@@ -1,16 +1,18 @@
 // src/pages/TenantHome.jsx
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+// keep libraries array static to avoid reloading script
+const LIBRARIES = ['places'];
+import Select from 'react-select';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
-import Range     from 'rc-slider/lib/Range';         // rc-slider 的 Range
-import 'rc-slider/assets/index.css';                 // 範例樣式
-import Select    from 'react-select';                // react-select
-import 'react-select/dist/react-select.css';         // 可能要確認路徑
+
 
 export default function TenantHome({ listings, searchCenter }) {
   // Google Map loader
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ['places']
+    libraries: LIBRARIES
   });
 
   const mapRef = useRef(null);
@@ -95,7 +97,8 @@ export default function TenantHome({ listings, searchCenter }) {
         {/* 價格區間滑桿 */}
         <div>
           <label className="block text-gray-700 mb-2">價格區間 (NT$)</label>
-          <Range
+          <Slider
+            range
             min={filters.priceRange[0]}
             max={filters.priceRange[1]}
             defaultValue={filters.priceRange}
