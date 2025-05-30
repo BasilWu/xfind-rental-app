@@ -177,6 +177,12 @@ export default function TenantHome({ searchCenter }) {
           }
           zoom={14}
           onLoad={onLoadMap}
+          options={{
+            // 允許滑鼠滾輪直接縮放
+            scrollwheel: true,
+            // 設為 'greedy'，不再需要按鍵才能滑動或縮放
+            gestureHandling: 'greedy',
+          }}
         >
           {filteredListings.map(item => (
             <Marker
