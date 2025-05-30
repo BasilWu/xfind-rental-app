@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+// src/components/Header.jsx
+import { Link, useNavigate } from "react-router-dom";
 import React, { useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 
 export default function Header({ onPlaceSelect }) {
@@ -14,28 +14,34 @@ export default function Header({ onPlaceSelect }) {
   });
 
   const autocompleteRef = useRef(null);
-
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const onLoadAutocomplete = ref => {
-    autocompleteRef.current = ref;
-  };
-
+  const onLoadAutocomplete = ref => { autocompleteRef.current = ref; };
   const onPlaceChanged = () => {
     const place = autocompleteRef.current?.getPlace();
     if (place?.geometry?.location) {
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      onPlaceSelect({ lat, lng });
+      onPlaceSelect({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng()
+      });
     }
   };
 
   return (
     <header className="bg-white shadow p-4 flex justify-between items-center">
       <div className="flex items-center space-x-4">
+        {/* 首頁按鈕 */}
+        <button
+          onClick={() => navigate('/')}
+          className="text-xl font-bold hover:opacity-80"
+        >
+          XFind
+        </button>
+
+        {/* 地址搜尋 */}
         {isLoaded && (
           <Autocomplete
             onLoad={onLoadAutocomplete}
@@ -51,15 +57,17 @@ export default function Header({ onPlaceSelect }) {
       </div>
 
       <div>
-        <span>Hello, {user?.email}</span>
-        <Link to="/profile" className="ml-4 hover:underline">會員中心</Link>
-        {/* 只有房東看到 */}
+        <span className="mr-4">Hello, {user?.email}</span>
+        <Link to="/" className="mr-4 hover:underline">首頁</Link>
+        <Link to="/profile" className="mr-4 hover:underline">會員中心</Link>
         {profile?.role === "landlord" && (
-          <Link to="/landlord" className="ml-4 hover:underline">
+          <Link to="/landlord" className="mr-4 hover:underline">
             房東後台
           </Link>
         )}
-        <button onClick={handleLogout} className="ml-4 text-red-500">登出</button>
+        <button onClick={handleLogout} className="text-red-500 hover:opacity-80">
+          登出
+        </button>
       </div>
     </header>
   );
